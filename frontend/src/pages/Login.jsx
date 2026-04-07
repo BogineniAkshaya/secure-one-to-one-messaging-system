@@ -10,21 +10,33 @@ export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const result = await login(email, password)
-    
+  console.log("🔥 Submit clicked");   // ADD THIS
+
+  setError('');
+  setLoading(true);
+
+  try {
+    console.log("📡 Calling login function...");   // ADD THIS
+
+    const result = await login(email, password);
+
+    console.log("📦 Login result:", result);   // ADD THIS
+
     if (result.success) {
-      navigate('/chat')
+      navigate('/chat');
     } else {
-      setError(result.error || 'Login failed')
+      setError(result.error || 'Login failed');
     }
-    
-    setLoading(false)
+
+  } catch (err) {
+    console.error("❌ HANDLE SUBMIT ERROR:", err);   // ADD THIS
   }
+
+  setLoading(false);
+};
 
   return (
     <div className="auth-page">
