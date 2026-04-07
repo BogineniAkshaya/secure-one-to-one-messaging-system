@@ -14,14 +14,33 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// ✅ Allowed origins (IMPORTANT)
+// 🔥 Allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://secure-one-to-one-messaging-system-1.onrender.com'
 ];
 
-// ✅ Socket.IO CORS
+// 🔥 CORS function (VERY IMPORTANT)
+const corsOptions = {
+  origin: function (origin, callback) {
+    // allow requests with no origin (like Postman / Render internal)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+};
+
+// 🔥 Apply CORS
+app.use(cors(corsOptions));
+app.use(express.json());
+
+// 🔥 Socket.IO CORS
 const io = new Server(httpServer, {
   cors: {
     origin: allowedOrigins,
@@ -29,36 +48,28 @@ const io = new Server(httpServer, {
   }
 });
 
-// ✅ Express CORS
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
-
-app.use(express.json());
-
-// ✅ Routes
+// 🔥 Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 
-// ✅ Health check
+// 🔥 Health check
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'SecureChat API is running' });
 });
 
-// ✅ Error handler
+// 🔥 Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error:', err.message);
   res.status(500).json({
     success: false,
-    error: 'Something went wrong!'
+    error: err.message || 'Something went wrong!'
   });
 });
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ Socket logic
+// 🔥 Socket logic
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
@@ -116,7 +127,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// ✅ Start server
+// 🔥 Start server
 const startServer = async () => {
   try {
     await connectDB();
@@ -130,5 +141,3 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-
-startServer();
