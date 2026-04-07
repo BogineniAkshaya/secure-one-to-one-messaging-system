@@ -127,17 +127,20 @@ io.on('connection', (socket) => {
   });
 });
 
-// 🔥 Start server
 const startServer = async () => {
   try {
+    console.log("🚀 Starting server...");
+
     await connectDB();
+    console.log("✅ MongoDB connected");
 
     httpServer.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`🔥 Server running on port ${PORT}`);
     });
 
   } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+    console.error("❌ SERVER START ERROR:", error);
   }
 };
+
+startServer();
